@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with SU2. If not, see <http://www.gnu.org/licenses/>.
  */
-
+//test comment
 #include "../include/SU2_CFD.hpp"
 
 /* LIBXSMM include files, if supported. */

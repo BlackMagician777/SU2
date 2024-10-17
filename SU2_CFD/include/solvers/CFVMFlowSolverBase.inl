@@ -1267,7 +1267,7 @@ void CFVMFlowSolverBase<V, FlowRegime>::BC_Fluid_Interface(CGeometry* geometry, 
 
   su2double weight;
   su2double P_static, rho_static;
-
+  /*iMaker is boundary index, i is target index, j is donor index*/
   for (iMarker = 0; iMarker < config->GetnMarker_All(); iMarker++) {
     if (config->GetMarker_All_KindBC(iMarker) == FLUID_INTERFACE) {
       SU2_OMP_FOR_DYN(OMP_MIN_SIZE)

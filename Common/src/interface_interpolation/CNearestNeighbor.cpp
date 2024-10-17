@@ -35,6 +35,8 @@ CNearestNeighbor::CNearestNeighbor(CGeometry**** geometry_container, const CConf
     : CInterpolator(geometry_container, config, iZone, jZone) {
   SetTransferCoeff(config);
 }
+/*--- i -- donor, j -- target 
+it is a constructor of the class. ---*/ 
 
 void CNearestNeighbor::PrintStatistics() const {
   if (rank != MASTER_NODE) return;
@@ -83,7 +85,7 @@ void CNearestNeighbor::SetTransferCoeff(const CConfig* const* config) {
 
     const auto nPossibleDonor =
         accumulate(Buffer_Receive_nVertex_Donor, Buffer_Receive_nVertex_Donor + nProcessor, 0ul);
-
+    /*these buffer aims to exchange data in parallel computaion*/
     Buffer_Send_Coord.resize(MaxLocalVertex_Donor, nDim);
     Buffer_Send_GlobalPoint.resize(MaxLocalVertex_Donor);
     Buffer_Receive_Coord.resize(nProcessor * MaxLocalVertex_Donor, nDim);
@@ -108,8 +110,13 @@ void CNearestNeighbor::SetTransferCoeff(const CConfig* const* config) {
 
         if (!target_geometry->nodes->GetDomain(Point_Target)) continue;
 
-        /*--- Coordinates of the target point. ---*/
+        /*--- Coordinates of the target point. returns a pointer to the coordinates of a point at a specified index.---*/
         const su2double* Coord_i = target_geometry->nodes->GetCoord(Point_Target);
+        std::cout << "Coord_i: ";
+        for (unsigned short i = 0; i < 3; ++i) {
+            std::cout << Coord_i[i] << " ";
+        }
+        std::cout << std::endl;        
 
         /*--- Compute all distances. ---*/
         for (int iProcessor = 0, iDonor = 0; iProcessor < nProcessor; ++iProcessor) {
@@ -144,12 +151,14 @@ void CNearestNeighbor::SetTransferCoeff(const CConfig* const* config) {
         }
 
         /*--- Set interpolation coefficients. ---*/
-        target_vertex.resize(nDonor);
+        target_vertex.resize(nDonor); // resize to nDonor, as it may be smaller than the buffer size.
 
         for (auto iDonor = 0ul; iDonor < nDonor; ++iDonor) {
           target_vertex.globalPoint[iDonor] = donorInfo[iDonor].pidx;
           target_vertex.processor[iDonor] = donorInfo[iDonor].proc;
           target_vertex.coefficient[iDonor] = donorInfo[iDonor].dist / denom;
+          target_vertex.coefficient[iDonor] = donorInfo[iDonor].dist / denom;
+          std::cout << "target_vertex.coefficient[" << iDonor << "] = " << target_vertex.coefficient[iDonor] << std::endl; 
         }
       }
       END_SU2_OMP_FOR
